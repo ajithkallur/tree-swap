@@ -1,0 +1,131 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+class Solution
+{
+
+    /*
+     * Complete the swapNodes function below.
+     */
+    class TreeNode
+    {
+        public TreeNode left;
+        public TreeNode right;
+        public int data;
+        public int depth;
+    }
+
+
+    static int[][] swapNodes(int[][] indexes, int[] queries)
+    {
+
+        int n = indexes.Length;
+        TreeNode[] Tree = new TreeNode[(2 * n)]; int dep = 2;
+        List<List<int>> endresult = new List<List<int>>();
+
+        for (int i = 0; i < 2 * (indexes.Length); i++)
+        {
+            TreeNode no = new TreeNode();
+            no.data = i + 1;
+            no.left = null;
+            no.right = null;
+            no.depth = 0;
+            Tree[i] = no;
+        }
+        Tree[0].depth = 1;
+
+
+
+        for (int i = 0; i < indexes.Length - 1; i++)
+        {
+
+
+            if (indexes[i][0] != -1)
+            {
+                Tree[i].left = Tree[indexes[i][0] - 1];
+                Tree[i].left.depth = Tree[i].depth + 1;
+
+            }
+
+            if (indexes[i][1] != -1)
+            {
+                Tree[i].right = Tree[indexes[i][1] - 1];
+                Tree[i].right.depth = Tree[i].depth + 1;
+
+            }
+
+        }
+
+        for (int i = 0; i < queries.Length; i++)
+        {
+            List<int> result = new List<int>();
+            InorederSwap(Tree[0], queries[i]);
+            InOrderTrav(Tree[0], result);
+            endresult.Add(result);
+
+        }
+
+        return endresult.Select(a => a.ToArray()).ToArray();
+    }
+    static void InorederSwap(TreeNode root, int n)
+    {
+        Queue<TreeNode> q = new Queue<TreeNode>();
+        q.Enqueue(root);
+        TreeNode temp_node = root;
+        TreeNode temp = null;
+        while(q.Count != 0)
+        {
+            temp_node = q.Dequeue();
+            if ((temp_node.depth % n) == 0)
+            {
+                temp = temp_node.left;
+                temp_node.left = temp_node.right;
+                temp_node.right = temp;
+            }
+            if (temp_node.left != null)
+            { q.Enqueue(temp_node.left); }
+            if (temp_node.right != null) { q.Enqueue(temp_node.right); }
+            
+        } 
+
+    }
+    static void InOrderTrav(TreeNode root, List<int> result)
+    {
+        if (root == null) return;
+        InOrderTrav(root.left, result);
+        result.Add(root.data);
+        InOrderTrav(root.right, result);
+    }
+    static void Main(string[] args)
+    {
+       // TextWriter textWriter = new StreamWriter(@System.Environment.GetEnvironmentVariable("OUTPUT_PATH"), true);
+
+        int n = Convert.ToInt32(Console.ReadLine());
+
+        int[][] indexes = new int[n][];
+
+        for (int indexesRowItr = 0; indexesRowItr < n; indexesRowItr++)
+        {
+            indexes[indexesRowItr] = Array.ConvertAll(Console.ReadLine().Split(' '), indexesTemp => Convert.ToInt32(indexesTemp));
+        }
+
+        int queriesCount = Convert.ToInt32(Console.ReadLine());
+
+        int[] queries = new int[queriesCount];
+
+        for (int queriesItr = 0; queriesItr < queriesCount; queriesItr++)
+        {
+            int queriesItem = Convert.ToInt32(Console.ReadLine());
+            queries[queriesItr] = queriesItem;
+        }
+
+        int[][] result = swapNodes(indexes, queries);
+
+        Console.WriteLine(String.Join("\n", result.Select(x => String.Join(" ", x))));
+
+       // textWriter.Flush();
+        //textWriter.Close();
+    }
+}
